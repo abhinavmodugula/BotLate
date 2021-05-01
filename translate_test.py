@@ -1,11 +1,32 @@
 from Translator import Translator
 from Conversation import Conversation
 from Content import Content
-from google.cloud import dialogflow
+from google.cloud import dialogflow, language_v1
 
 if __name__ == '__main__':
+    """
     trans = Translator()
-    convo = Conversation(trans, "Spanish")
+    sent_client = language_v1.LanguageServiceClient()
+    type_ = language_v1.Document.Type.PLAIN_TEXT
+
+    text_content = "I am so happy and joyful"
+
+    document = {
+        "content": text_content,
+        "type_": type_
+    }
+
+    encoding_type = language_v1.EncodingType.UTF8
+
+    response = sent_client.analyze_sentiment(request={'document': document, 'encoding_type': encoding_type})
+
+    sentiment = response.document_sentiment
+    print(sentiment.score)
+    """
+
+
+    trans = Translator()
+    convo = Conversation(trans, "English")
 
     while not convo.is_done():
         prompt, hint = convo.ask()

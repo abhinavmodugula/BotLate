@@ -1,6 +1,6 @@
 import json
 from Translator import Translator, supported_speech_langs
-from google.cloud import dialogflow
+from google.cloud import dialogflow, language_v1
 
 #Config for the bot that was made in DialogFlow
 project_id = "botlate"
@@ -29,12 +29,14 @@ class ConvoElement:
 
         self.intent = None #intent from the DialogFlow website
 
-    def process_answer(self, bot_txt):
+    def process_answer(self, bot_txt, score=None):
         """returns a text response once english
         text is passed in. It is guranteed to be the correct response"""
         if self.sentiment:
-            pass
-            #TODO: get reponse from sentiment
+            if score > 0.6:
+                return self.pos_res
+            elif score < 0.4:
+                return self.neg_res
         return bot_txt
 
     def get_hint(self):
@@ -61,12 +63,28 @@ class Conversation:
         self.session_client = dialogflow.SessionsClient() #for the convo bot
         self.session = self.session_client.session_path("botlate", 123456)
 
-        #TODO: sentiment client
+        #sentiment client
+        self.sent_client = language_v1.LanguageServiceClient()
+        self.type_ = language_v1.Document.Type.PLAIN_TEXT
+
+
+
         self.trans_obj = trans_obj
         self.elem_counter = 0
         self.convo_elems = self.load_convo_elems()
 
+    def get_sentiment_score(self, txt):
+        document = {
+            "content": txt,
+            "type_": self.type_
+        }
 
+        encoding_type = language_v1.EncodingType.UTF8
+
+        response = self.sent_client.analyze_sentiment(request={'document': document, 'encoding_type': encoding_type})
+
+        sentiment = response.document_sentiment
+        return sentiment.score
 
     def send_to_bot(self, txt):
         #translate to English
@@ -96,13 +114,16 @@ class Conversation:
         classes = ConvoElement("Friend: School is starting soon (sighs). How many classes are you taking?\n", "Tell your friend the number of classes you're taking\n")
         classes.intent = "bot.classes"
 
+        school_sentiment = ConvoElement("Friend: Are you excited for school?\n", "Tell your friend specific emotions.\n", None, "I'm glad to hear that!", "Oh no. That's unforunate")
+        school_sentiment.intent = "bot.school_feeling"
+
         major = ConvoElement("Friend: Also, I still need to decide my major. What major are you?\n", "Tell your friend what major you are in\n")
         major.intent = "bot.major"
 
         bill = ConvoElement("You have finished your meal and are getting ready to leave. The waiter is nearby and so now you should ask for a bill\n", "Ask if you can see the bill\n")
         bill.intent = "bot.ask_for_bill"
 
-        ret = [ask_for_table, fav_season, classes, major, bill]
+        ret = [ask_for_table, fav_season, classes, school_sentiment, major, bill]
 
         return ret
 
@@ -122,6 +143,11 @@ class Conversation:
         intent, bot_res = self.send_to_bot(user_in)
 
         if intent == self.convo_elems[self.elem_counter].intent:
+            is_sentiment = self.convo_elems[self.elem_counter].sentiment
+            if is_sentiment:
+                score = self.get_sentiment_score(user_in)
+                ret = self.convo_elems[self.elem_counter].process_answer(bot_res, score)
+                return ret
             ret = self.convo_elems[self.elem_counter].process_answer(bot_res)
             self.elem_counter += 1
             return self.trans_obj.translate(self.trans_obj.lang_dict_rev[self.lang], ret)
