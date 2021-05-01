@@ -40,8 +40,6 @@ class ConvoElement:
     def get_hint(self):
         return self.hint
 
-
-
 class Conversation:
     """
     This is a class representing an example conversastion.
@@ -71,8 +69,11 @@ class Conversation:
 
 
     def send_to_bot(self, txt):
+        #translate to English
+        text = self.trans_obj.translate("en", txt)
+
         #sends to bot and returns intent, response
-        text_input = dialogflow.TextInput(text=txt, language_code=self.lang_to_code[self.lang])
+        text_input = dialogflow.TextInput(text=text, language_code=self.lang_to_code[self.lang])
         query_input = dialogflow.QueryInput(text=text_input)
 
         response = self.session_client.detect_intent(

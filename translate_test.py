@@ -5,7 +5,7 @@ from google.cloud import dialogflow
 
 if __name__ == '__main__':
     trans = Translator()
-    convo = Conversation(trans, "English")
+    convo = Conversation(trans, "Spanish")
 
     while not convo.is_done():
         prompt, hint = convo.ask()
