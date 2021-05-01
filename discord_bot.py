@@ -1,9 +1,9 @@
 import discord
-from Translator import Translator
-from Content import Content
-import time
 import os
 import time
+from Translator import Translator
+from Content import Content
+from bot_cred import bot_token
 
 translator = Translator()
 supported_langs = translator.speech_langs
@@ -170,4 +170,4 @@ async def on_message(message):
 
 
 
-client.run('ODM2ODAyNjAwMjg0MDYxNzA1.YIjTJg.NH1Y0Ki3Hxx82uQZH9Wv44yiVfI')
+client.run(bot_token)

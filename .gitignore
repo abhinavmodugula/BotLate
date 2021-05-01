@@ -3,3 +3,4 @@ audio_data
 .DS_STORE
 .idea
 __pychache__
+bot_cred.py
