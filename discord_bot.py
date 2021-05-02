@@ -17,7 +17,7 @@ CONFIG = {"lang": "Spanish", "voice_mode": "female"}
 COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'update_config': 2, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0, 'config': 0, 'convo': 0} # A dictionary of commands and the number of arguments taken by each command
 
 Content = Content(translator, CONFIG["lang"])
-conversation = Conversation(translator, CONFIG["lang"])
+conversation = None
 
 #Define different colors for embed
 red = discord.Color.red()
@@ -241,6 +241,7 @@ async def on_message(message):
             quiz.reset()
 
         elif command == 'convo':
+            conversation = Conversation(translator, CONFIG["lang"])
             #conversastion object has been loaded at start
             while not conversation.is_done():
                 prompt, hint = conversation.ask()
