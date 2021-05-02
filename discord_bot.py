@@ -14,7 +14,7 @@ README = "TODO\n"
 
 COMMAND_PREFIX = '-bl'
 CONFIG = {"lang": "Spanish", "voice_mode": "female"}
-COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'update_config': 2, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0, 'config': 0, 'conversation': 0} # A dictionary of commands and the number of arguments taken by each command
+COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'update_config': 2, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0, 'config': 0, 'convo': 0} # A dictionary of commands and the number of arguments taken by each command
 
 Content = Content(translator, CONFIG["lang"])
 conversation = Conversation(translator, CONFIG["lang"])
@@ -162,7 +162,7 @@ async def on_message(message):
             to_change = args[0]
             new_val = args[1]
             CONFIG[to_change] = new_val
-            s = "lang: " + CONFIG["lang"] + " voice_mode: " + CONFIG["voice_mode"]
+            s = "lang: " + CONFIG["lang"] + "\nvoice_mode: " + CONFIG["voice_mode"]
             await say_fancy("Current config: ", s, red)
 
         elif command == 'play':
@@ -244,11 +244,11 @@ async def on_message(message):
             #conversastion object has been loaded at start
             while not conversation.is_done():
                 prompt, hint = conversation.ask()
-                await say_with_hint("Prompt: ", prompt, hint, gold)
+                await say_with_hint("Prompt: ", prompt, hint, blue)
                 await talk(prompt)
                 answer = await client.wait_for("message", timeout=120)
-                bot_res = conversation.answer(answer)
-                await say_fancy("Response: ", bot_res)
+                bot_res = conversation.answer(answer.content)
+                await say_fancy("Response: ", bot_res, blue)
                 await talk(bot_res)
             await say("Great conversation!")
             conversation.reset()
