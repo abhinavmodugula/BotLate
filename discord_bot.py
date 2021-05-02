@@ -36,16 +36,23 @@ def parse_command_args(message):
     arg_list, A list of strings representing the arguments passed by the user based on the number of arguments in COMMANDS,
     data, A string: the data after the arguments passed by the user
     """
-    args = str(message.content).strip().lower().split(" ")
+    args = str(message.content).strip().split(" ")
+    print(args)
     arg_list = []
     args.pop(0) # removes command prefix
     command = args.pop(0)  # second arg in args is always command
     num_args = COMMANDS[command]
     i = 0
     while i < num_args:
-        arg_list.append(args.pop(i))
+        arg_list.append(args[i])
         i += 1
-    data = ' '.join(args) # create data/sentence from leftover stuff in args
+
+    data_arr = []
+    while i < len(args):
+        data_arr.append(args[i])
+        i += 1
+
+    data = ' '.join(data_arr) # create data/sentence from leftover stuff in args
     print("command: ", command, "args: ", arg_list, "data: ", data)
     return command, arg_list, data
 
@@ -148,6 +155,13 @@ async def on_message(message):
             await disconnect_vc(voice_client)
 
         elif command == 'config':
+            s = "lang: " + CONFIG["lang"] + " voice_mode: " + CONFIG["voice_mode"]
+            await say_fancy("Current config: ", s, red)
+
+        elif command == 'update_config':
+            to_change = args[0]
+            new_val = args[1]
+            CONFIG[to_change] = new_val
             s = "lang: " + CONFIG["lang"] + " voice_mode: " + CONFIG["voice_mode"]
             await say_fancy("Current config: ", s, red)
 
