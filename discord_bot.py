@@ -5,6 +5,7 @@ from Conversation import Conversation
 import os
 import time
 import ctx
+from bot_cred import bot_token
 
 translator = Translator()
 supported_langs = translator.speech_langs
@@ -13,7 +14,7 @@ README = "TODO\n"
 
 COMMAND_PREFIX = '-bl'
 CONFIG = {"lang": "Spanish", "voice_mode": "female"}
-COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0} # A dictionary of commands and the number of arguments taken by each command
+COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'update_config': 2, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0, 'config': 0} # A dictionary of commands and the number of arguments taken by each command
 
 Content = Content(translator, CONFIG["lang"])
 conversation = Conversation(translator, CONFIG["lang"])
@@ -123,18 +124,19 @@ async def on_message(message):
         await message.channel.send(message_to_say)
 
     async def say_fancy(title, message_to_say, color):
-        embed = discord.Embed(title=title, description=message, color=color)
-        await ctx.send(embed=embed)
+        embed = discord.Embed(title=title, description=message_to_say, color=color)
+        await message.channel.send(embed=embed)
 
-    async def say_with_hint(title, main_message, hint, color):
+    async def say_with_hint(title, main_message, hint_, color):
         embed = discord.Embed(title=title, description=main_message, color=color)
-        embed.add_field(name="hint", value=hint, inline=False)
-        await ctx.send(embed=embed)
+        embed.add_field(name="hint", value=hint_, inline=False)
+        await message.channel.send(embed=embed)
 
     if message.author == client.user:
         return
 
     if message.content.startswith(COMMAND_PREFIX): # If a user has entered a command
+        print(message)
         command, args, data = parse_command_args(message)
         print("command: ", command, "args: ", args, "data: ", data)
 
@@ -145,12 +147,17 @@ async def on_message(message):
             voice_client = client.voice_clients[0]
             await disconnect_vc(voice_client)
 
+        elif command == 'config':
+            s = "lang: " + CONFIG["lang"] + " voice_mode: " + CONFIG["voice_mode"]
+            await say_fancy("Current config: ", s, red)
+
         elif command == 'play':
             voice_client = client.voice_clients[0]
             encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
             voice_client.play(encoded_audio)
 
         elif command == 'translate':
+            #TODO: not working
             lang = args[0]
             if lang not in supported_langs.keys():
                 data = args.pop(0) + " " + data
@@ -169,7 +176,6 @@ async def on_message(message):
             except IndexError:
                 print("Voice client not connected, translating without audio")
 
-        # TODO: Command to output config
         # TODO: Command to update config
         elif command == 'help' or command == '?':
             file_object = open("./command_list.txt", "r")
@@ -177,11 +183,11 @@ async def on_message(message):
             for line in file_object:
                 s += line
             s += "```"
-            await say(s)
+            await say_fancy("Possible Commands: ", s, gold)
 
         elif command == 'list_quizzes':
             await connect_vc(message)
-            await say(list_quizes())
+            await say_fancy("All quizzes ", list_quizes(), green)
 
         elif command == 'quiz':
             """
@@ -235,4 +241,4 @@ async def on_message(message):
 
 
 
-client.run('ODM2ODAyNjAwMjg0MDYxNzA1.YIjTJg.QyT9gAK6eLW2WROE1b7fKea2qbw')
+client.run(bot_token)
