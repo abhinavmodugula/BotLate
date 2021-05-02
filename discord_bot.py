@@ -17,7 +17,7 @@ CONFIG = {"lang": "Spanish", "voice_mode": "female"}
 COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'update_config': 2, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0, 'config': 0, 'convo': 0} # A dictionary of commands and the number of arguments taken by each command
 
 Content = Content(translator, CONFIG["lang"])
-conversation = None
+conversation  = None
 
 #Define different colors for embed
 red = discord.Color.red()
@@ -25,7 +25,6 @@ blue = discord.Color.blue()
 gold = discord.Color.dark_gold()
 green = discord.Color.dark_green()
 orange = discord.Color.orange()
-
 
 
 def parse_command_args(message):
@@ -60,6 +59,7 @@ def parse_command_args(message):
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+
 
 def list_quizes():
     """Returns a string of available quizzes"""
@@ -96,6 +96,7 @@ async def talk(text):
         os.remove("./audio_data/temp/output.ogg")
     except IndexError:
         print("Voice client not connected, translating without audio")
+
 
 async def disconnect_vc(connected_voice_client):
     """
@@ -143,6 +144,7 @@ async def on_message(message):
         return
 
     if message.content.startswith(COMMAND_PREFIX): # If a user has entered a command
+
         print(message)
         command, args, data = parse_command_args(message)
         print("command: ", command, "args: ", args, "data: ", data)
@@ -171,7 +173,6 @@ async def on_message(message):
             voice_client.play(encoded_audio)
 
         elif command == 'translate':
-            #TODO: not working
             lang = args[0]
             if lang not in supported_langs.keys():
                 data = args.pop(0) + " " + data
@@ -190,7 +191,6 @@ async def on_message(message):
             except IndexError:
                 print("Voice client not connected, translating without audio")
 
-        # TODO: Command to update config
         elif command == 'help' or command == '?':
             file_object = open("./command_list.txt", "r")
             s = "List of possible commands:\n```"
@@ -253,7 +253,6 @@ async def on_message(message):
                 await talk(bot_res)
             await say("Great conversation!")
             conversation.reset()
-
 
 
 client.run(bot_token)
