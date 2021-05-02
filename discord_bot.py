@@ -167,10 +167,11 @@ async def on_message(message):
             s = "lang: " + CONFIG["lang"] + "\nvoice_mode: " + CONFIG["voice_mode"]
             await say_fancy("Current config: ", s, red)
 
-        elif command == 'play':
-            voice_client = client.voice_clients[0]
-            encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
-            voice_client.play(encoded_audio)
+
+        # elif command == 'play':
+        #     voice_client = client.voice_clients[0]
+        #     encoded_audio = discord.FFmpegOpusAudio("./audio_data/output.mp3")
+        #     voice_client.play(encoded_audio)
 
         elif command == 'translate':
             lang = args[0]
