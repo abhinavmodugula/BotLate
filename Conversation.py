@@ -159,6 +159,9 @@ class Conversation:
     def is_done(self):
         return self.elem_counter > len(self.convo_elems) - 1
 
+    def reset(self):
+        self.elem_counter = 0
+
 
 
 

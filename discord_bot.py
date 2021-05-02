@@ -1,9 +1,10 @@
 import discord
 from Translator import Translator
 from Content import Content
-import time
+from Conversation import Conversation
 import os
 import time
+import ctx
 
 translator = Translator()
 supported_langs = translator.speech_langs
@@ -15,6 +16,15 @@ CONFIG = {"lang": "Spanish", "voice_mode": "female"}
 COMMANDS = {COMMAND_PREFIX: 0, 'join': 0, 'leave': 0, 'play': 0, 'translate': 1, 'list_quizzes': 0, 'quiz': 1, 'help': 0, '?': 0} # A dictionary of commands and the number of arguments taken by each command
 
 Content = Content(translator, CONFIG["lang"])
+conversation = Conversation(translator, CONFIG["lang"])
+
+#Define different colors for embed
+red = discord.Color.red()
+blue = discord.Color.blue()
+gold = discord.Color.dark_gold()
+green = discord.Color.dark_green()
+orange = discord.Color.orange()
+
 
 
 def parse_command_args(message):
@@ -112,6 +122,15 @@ async def on_message(message):
     async def say(message_to_say):
         await message.channel.send(message_to_say)
 
+    async def say_fancy(title, message_to_say, color):
+        embed = discord.Embed(title=title, description=message, color=color)
+        await ctx.send(embed=embed)
+
+    async def say_with_hint(title, main_message, hint, color):
+        embed = discord.Embed(title=title, description=main_message, color=color)
+        embed.add_field(name="hint", value=hint, inline=False)
+        await ctx.send(embed=embed)
+
     if message.author == client.user:
         return
 
@@ -137,7 +156,8 @@ async def on_message(message):
                 data = args.pop(0) + " " + data
                 lang = CONFIG["lang"]
             text = translator.translate(supported_langs[lang][0:2], data)
-            await say("Your message translated into " + lang + " is:\n```" + text + "```")
+            #await say("Your message translated into " + lang + " is:\n```" + text + "```")
+            await say_fancy("Your message translated into " + lang + " is:", text, orange)
             try:
                 voice_client = client.voice_clients[0]
                 translator.speak(supported_langs[lang], text, CONFIG["voice_mode"])
@@ -199,6 +219,19 @@ async def on_message(message):
             final_score = quiz.percent()
             await say("You got a " + str(final_score) + "%!\n")
             quiz.reset()
+
+        elif command == 'convo':
+            #conversastion object has been loaded at start
+            while not conversation.is_done():
+                prompt, hint = conversation.ask()
+                await say_with_hint("Prompt: ", prompt, hint, gold)
+                await talk(prompt)
+                answer = await client.wait_for("message", timeout=120)
+                bot_res = conversation.answer(answer)
+                await say_fancy("Response: ", bot_res)
+                await talk(bot_res)
+            await say("Great conversation!")
+            conversation.reset()
 
 
 
